@@ -1,3 +1,8 @@
-# population-api
+# Uzbekistan Population API
 
-This is the README file for population-api.
+📍 Endpoint:
+```
+https://population-api-fnwe.onrender.com/population
+```
+
+Returns Uzbekistan population data in JSON.
