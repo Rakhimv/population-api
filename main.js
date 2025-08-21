@@ -1,10 +1,15 @@
 import express from "express";
 import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/population", async (req, res) => {
+const DATA_FILE = path.join("/tmp", "population.json");
+
+
+async function fetchPopulation() {
   try {
     const browser = await puppeteer.launch({
       headless: true,
@@ -22,10 +27,34 @@ app.get("/population", async (req, res) => {
 
     await browser.close();
 
-    res.json({ people, man, woman });
+    const data = { people, man, woman, updated: new Date().toISOString() };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    console.log("Population обновлено:", data);
+    return data;
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Ошибка при парсинге" });
+    console.error("Ошибка парсинга:", err);
+  }
+}
+
+fetchPopulation();
+setInterval(fetchPopulation, 5 * 60 * 1000);
+
+
+app.get("/population", (req, res) => {
+  if (fs.existsSync(DATA_FILE)) {
+    res.sendFile(DATA_FILE);
+  } else {
+    res.json({ error: "Данные ещё не загружены" });
+  }
+});
+
+
+app.get("/update", async (req, res) => {
+  try {
+    const data = await fetchPopulation();
+    res.json({ status: "updated", data });
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка при обновлении" });
   }
 });
 
