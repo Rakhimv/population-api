@@ -8,6 +8,12 @@ const PORT = process.env.PORT || 3000;
 
 const DATA_FILE = path.join("/tmp", "population.json");
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 async function fetchPopulation() {
   try {
@@ -61,3 +67,4 @@ app.get("/update", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
